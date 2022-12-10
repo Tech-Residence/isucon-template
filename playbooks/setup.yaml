@@ -1,0 +1,64 @@
+---
+- name: setup
+  hosts: all
+  become: true
+  vars:
+    apt_repositories: [] #"ppa:longsleep/golang-backports" # ref: https://github.com/golang/go/wiki/Ubuntu
+    apt_packages:
+      - "htop"
+      - "zsh"
+      - "bash"
+      - "unzip"
+      - "rsync"
+      - "emacs"
+      - "git"
+    arm64_binaries:
+      - "https://github.com/tkuchiki/alp/releases/download/v1.0.9/alp_linux_arm64.zip"
+    amd64_binaries:
+      - "https://github.com/tkuchiki/alp/releases/download/v1.0.9/alp_linux_amd64.zip"
+  tasks:
+    - name: Add apt repository
+      ansible.builtin.apt_repository:
+        repo: "{{ repo }}"
+        state: present
+      loop_control:
+        loop_var: repo
+      loop: "{{ apt_repositories }}"
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install apt packages
+      when: ansible_os_family == 'Debian'
+      ansible.builtin.apt:
+        name: "{{ pkg }}"
+        state: present
+      loop: "{{ apt_packages }}"
+      loop_control:
+        loop_var: pkg
+
+    - name: Print architecture
+      ansible.builtin.debug:
+        msg: "{{ ansible_architecture }}"
+
+    - name: Download aarch64 binaries
+      when: ansible_architecture == "aarch64"
+      ansible.builtin.unarchive:
+        src: "{{ src }}"
+        dest: /usr/local/bin
+        remote_src: true
+      loop: "{{ arm64_binaries }}"
+      loop_control:
+        loop_var: src
+
+    - name: Download x86_64 binaries
+      when: ansible_architecture == "x86_64"
+      ansible.builtin.unarchive:
+        src: "{{ src }}"
+        dest: /usr/local/bin
+        remote_src: true
+      loop: "{{ amd64_binaries }}"
+      loop_control:
+        loop_var: src
