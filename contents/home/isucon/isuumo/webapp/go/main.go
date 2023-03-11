@@ -21,7 +21,6 @@ import (
 )
 
 const Limit = 20
-const NazotteLimit = 50
 
 var db *sqlx.DB
 var mySQLConnectionData *MySQLConnectionEnv
@@ -865,7 +864,7 @@ func searchEstateNazotte(c echo.Context) error {
 
 	query := fmt.Sprintf(
 		`SELECT * FROM estate WHERE ST_Contains(ST_PolygonFromText(%s, 4326), coordinate) 
-         ORDER BY popularity DESC, id ASC`,
+         ORDER BY popularity DESC, id ASC LIMIT 50`,
 		coordinates.coordinatesToText())
 	estatesInPolygon := []Estate{}
 	err = db.Select(
@@ -881,11 +880,7 @@ func searchEstateNazotte(c echo.Context) error {
 
 	var re EstateSearchResponse
 	re.Estates = []Estate{}
-	if len(estatesInPolygon) > NazotteLimit {
-		re.Estates = estatesInPolygon[:NazotteLimit]
-	} else {
-		re.Estates = estatesInPolygon
-	}
+	re.Estates = estatesInPolygon
 	re.Count = int64(len(re.Estates))
 
 	return c.JSON(http.StatusOK, re)
