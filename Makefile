@@ -41,3 +41,6 @@ ansible-lint-all:
 
 ansible-lint-%:
 	docker-compose run ansible-runner ansible-lint ${@ansible-lint-%=%}.yaml
+
+mock-ping:
+	docker-compose run ansible-runner ansible -i $(MOCK_VM_IP), all -m ping -u ubuntu --private-key="/tmp/.ssh/$(PRIVATE_KEY)"

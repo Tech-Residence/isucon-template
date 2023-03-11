@@ -2,11 +2,11 @@
 all:
   hosts:
     server-1:
-      ansible_host: xxx.xxx.xxx.xxx
-      ansible_user: isucon
+      ansible_host: 43.207.204.87
+      ansible_user: ubuntu
     server-2:
-      ansible_host: yyy.yyy.yyy.yyy
-      ansible_user: isucon
+      ansible_host: 13.112.188.88
+      ansible_user: ubuntu
     sevrer-3:
-      ansible_host: zzz.zzz.zzz.zzz
-      ansible_user: isucon
+      ansible_host: 18.183.132.131
+      ansible_user: ubuntu
