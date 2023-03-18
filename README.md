@@ -61,7 +61,7 @@ make container-build
 必要なパッケージをサーバーにインストールする。
 
 ```
-make install-packages
+make install-packages-all
 ```
 
 完了まで数分かかるが、待たずに次の作業を進めることができる。
