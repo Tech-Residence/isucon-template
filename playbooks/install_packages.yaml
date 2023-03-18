@@ -1,5 +1,5 @@
 ---
-- name: setup
+- name: Install Packages
   hosts: all
   become: true
   vars:

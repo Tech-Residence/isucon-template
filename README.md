@@ -12,7 +12,7 @@ ISUCON用のテンプレートリポジトリ
 
 用意されているplaybook一覧
 
-- setup.yaml: サーバーに必要なパッケージをインストールするplaybook。最初に一度だけ実行する
+- install_packages.yaml: サーバーに必要なパッケージをインストールするplaybook。最初に一度だけ実行する
 - prepare_bench.yaml: ベンチマークテスト前に実行するplaybook。contestsのコピー、ビルド、各種アプリ・ミドルウェアの再起動、ログローテートなどを行う
 - analyze.yaml: ベンチマークの結果を解析するplaybook。
 
@@ -56,12 +56,12 @@ make container-build
 
 サーバー情報を`playbooks/inventory.ini`に記入してgit pushする。
 
-#### サーバーの初期セットアップ
+#### パッケージインストール
 
-必要なパッケージをインストールする。
+必要なパッケージをサーバーにインストールする。
 
 ```
-make setup
+make install-packages
 ```
 
 完了まで数分かかるが、待たずに次の作業を進めることができる。
