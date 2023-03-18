@@ -1,110 +1,103 @@
 # isucon-template
 
 ISUCON用のテンプレートリポジトリ
-試合毎にcloneして調整する。
+試合毎にcloneして調整して使用する。
 
 ## Requirements
 
 - docker
 - docker-compose >= v3.0
-- multipass (for development)
 
-## 最初にやること
+##　Playbooks
 
-### １. `.env`の作成
+用意されているplaybook一覧
 
-`.env`ファイルを作成して次の２つの変数を記載する。
+- setup.yaml: サーバーに必要なパッケージをインストールするplaybook。最初に一度だけ実行する
+- prepare_bench.yaml: ベンチマークテスト前に実行するplaybook。contestsのコピー、ビルド、各種アプリ・ミドルウェアの再起動、ログローテートなどを行う
+- analyze.yaml: ベンチマークの結果を解析するplaybook。
 
-- `PROJECT_NAME`: プロジェクト名 (ビルドされるコンテナVMのprefixになる)
-- `PRIVATE_KEY`: サーバーへのSSH接続に使う秘密鍵　（`$HOME/.ssh`以下にあるファイルしか使えない。フルパスではなくファイル名のみ。）
-  - ISUCON本番は参加登録時に申請した鍵
-  - mockサーバーの接続に使う鍵は`mock/cloud-init.yaml`で登録されている公開鍵に対応する秘密鍵
+## Usage
+
+### 事前準備
+
+#### 大会用リポジトリの用意
+
+このリポジトリをフォークして試合専用のリポジトリを作成しておく。フォーク先のリポジトリは**必ずprivateリポジトリにする**よう注意。
+
+#### サーバー接続用の秘密鍵の設定
+
+サーバーに接続するための鍵を大会参加登録時に登録したと思うので、その鍵を設定しておく。
+プロジェクト直下に`.env`ファイルを作成して`PRIVATE_KEY`変数の値として記載する。
+
+注意点:
+- `$HOME/.ssh`以下にあるファイルしか使えない
+- フルパスではなくファイル名のみ記載する
+- ISUCON本番は参加登録時に申請した鍵
 
 サンプル
+
 ```
-PROJECT_NAME=isucon13-qualify"
 PRIVATE_KEY="id_ed25519"
 ```
 
-### 2. コンテナビルド
+#### コンテナビルド
 
-ansibleの実行もGoコードのビルドも基本的にはすべてコンテナ上で行う。そのコンテナをビルドする。
+ansibleの実行もGoコードのビルドも基本的にはすべてコンテナ上で行う。そのコンテナをビルドしておく。
 
 ```
 make container-build
 ```
 
-## Usage
+### 大会当日の使い方
 
+下記の順番で実行する。
 
-### ISUCONの本番サーバーの初期セットアップ方法
+#### インベントリファイルの作成
 
-全サーバーのセットアップ
+サーバー情報を`playbooks/inventory.ini`に記入してgit pushする。
 
-```
-make server-setup
-```
+#### サーバーの初期セットアップ
 
-### ベンチマークを回す準備
-
-- Goのビルド
-- ローカルファイルをサーバーへコピー
-- ログのローテート
-
-などを行う
+必要なパッケージをインストールする。
 
 ```
-make prepare-bench-1
-make prepare-bench-2
-make prepare-bench-3
+make setup
 ```
 
-末尾の数字を変えて対象サーバーを切り替える
+完了まで数分かかるが、待たずに次の作業を進めることができる。
 
+#### コンテンツのコピー
 
-## Development
+必要なファイルをサーバーから`contents`ディレクトリにコピーする。
 
-### モックサーバーを使ったplaybookの開発方法
+注意点:
 
-playbookを開発するときはLinuxのVMサーバーをローカルにたててそこに対してplaybookを流してデバッグをすると便利。以下の流れで開発をする。
+- 大会ごとに必要なファイルは異なる。
+- `/home`, `/etc` 以下すべてをrsyncしてくると、ファイル数もサイズも大きすぎでgit管理できなくなるため必要なファイルだけ選ぶ
+- `/etc`　以下はシンボリックリンクが多いので注意。シンボリックリンクをrsyncしてきても編集はできない。
 
-#### 1. モックサーバーの起動
+以下のファイルは対象となることが多いので必ずチェックする
 
-モックサーバーが存在しない場合は新規作成、停止中の場合は再起動、起動中の場合は何もしない。
+- アプリケーションファイル
+  - `/home/isucon` などに配置されることが多い
+- nginxの設定ファル
+  - `/etc/nginx/nginx.conf` に配置されることが多い。見つからないときは、(`nginx -V`コマンドで確認できる。)
+  - `/etc/nginx/nginx.conf` のなかで別ファイルをincludeしていることも多いのでそれらのファイルもチェックする。記述量次第では`nginx.conf`にすべてまとめてしまうといいかもしれない。
+- mysqlの設定ファイル
+  - `/etc/my.cnf` に配置されることが多い。見つからないときは、(`mysqld --verbose --help | grep -A 1 "Default options"` コマンドで確認できる。)
+- systemdのserviceファイル
+  - `/etc/systemd/system` 以下に配置されることが多い。
 
-
+(例)
 ```
-make mock-start
-```
-
-#### 2. モックサーバーへの接続確認
-
-```
-make mock-ping
-```
-
-#### 3. リンターにかける
-
-実際にplaybookをサーバーに流す前に文法ミスなどがないか確認する
-
-```
-make ansible-lint
-```
-
-#### 4. setup.yamlプレイブックを流す
-
-```
-make mock-ansible-playbook-setup
+mkdir contents
+rsync -avz $USER@$IP:/home/isucon/<必要なディレクトリ> ./contents
+rsync -av $USER@$IP:/etc/nginx/nginx.conf ./contents
+rsync -av $USER@$IP:/etc/my.cnf ./contents
+rsync -av $USER@$IP:/etc/systemd/system/<アプリケーションのserviceファイル> ./contents
+...
 ```
 
-#### 5. モックサーバーの停止
+#### prepare_bench.yamlの修正
 
-```
-make mock-stop
-```
-
-#### 6. モックサーバーの削除
-
-```
-make mock-destroy
-```
+(後で記載する)
