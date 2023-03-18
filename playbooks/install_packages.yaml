@@ -3,7 +3,7 @@
   hosts: all
   become: true
   vars:
-    apt_repositories: [] #"ppa:longsleep/golang-backports" # ref: https://github.com/golang/go/wiki/Ubuntu
+    apt_repositories: [] # "ppa:longsleep/golang-backports" # ref: https://github.com/golang/go/wiki/Ubuntu
     apt_packages:
       - "htop"
       - "zsh"
