@@ -13,10 +13,10 @@
       - "emacs"
       - "git"
     arm64_binaries:
-      - "https://github.com/tkuchiki/alp/releases/download/v1.0.9/alp_linux_arm64.zip"
+      - "https://github.com/tkuchiki/alp/releases/download/v1.0.12/alp_linux_arm64.zip"
       - "https://github.com/matsuu/kataribe/releases/download/v0.4.3/kataribe-v0.4.3_linux_arm64.zip"
     amd64_binaries:
-      - "https://github.com/tkuchiki/alp/releases/download/v1.0.9/alp_linux_amd64.zip"
+      - "https://github.com/tkuchiki/alp/releases/download/v1.0.12/alp_linux_amd64.zip"
       - "https://github.com/matsuu/kataribe/releases/download/v0.4.3/kataribe-v0.4.3_linux_amd64.zip"
   tasks:
     - name: Add apt repository
