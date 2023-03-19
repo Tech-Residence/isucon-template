@@ -90,11 +90,20 @@ make install-packages-all
 
 (例)
 ```
-mkdir contents
-rsync -avz $USER@$IP:/home/isucon/<必要なディレクトリ> ./contents
-rsync -av $USER@$IP:/etc/nginx/nginx.conf ./contents
-rsync -av $USER@$IP:/etc/my.cnf ./contents
-rsync -av $USER@$IP:/etc/systemd/system/<アプリケーションのserviceファイル> ./contents
+mkdir -p ./contents/home/isucon
+rsync -av $USER@$IP:/home/isucon/env.sh ./contents/home/isucon/
+mkdir -p contents/home/isucon/isuumo/webapp
+rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/Makefile ./contents/home/isucon/isuumo/webapp
+rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/docker-compose ./contents/home/isucon/isuumo/webapp/
+rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/fixture ./contents/home/isucon/isuumo/webapp/
+rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/go ./contents/home/isucon/isuumo/webapp/
+rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/mysql ./contents/home/isucon/isuumo/webapp/
+rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/nginx ./contents/home/isucon/isuumo/webapp/
+mkdir -p contents/etc/nginx
+rsync -avz ubuntu@43.206.253.80:/etc/nginx/nginx.conf ./contents/etc/nginx
+
+➜ mkdir -p contents/etc/mysql
+rsync -avz ubuntu@43.206.253.80:/etc/mysql ./contents/etc/
 ...
 ```
 
