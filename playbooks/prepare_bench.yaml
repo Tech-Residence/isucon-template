@@ -1,0 +1,52 @@
+---
+- name: Prepare Bench
+  hosts: all
+  become: true
+  tasks:
+    - name: Sync app code
+      ansible.builtin.copy:
+        src: /contents/home/isucon/isuumo
+        dest: /home/isucon/
+    - name: Sync nginx conf
+      ansible.builtin.copy:
+        src: /contents/etc/mysql
+        dest: /etc/
+    - name: Sync mysql conf
+      ansible.builtin.copy:
+        src: /contents/etc/mysql
+        dest: /etc/
+    - name: Rotate nginx log
+      ansible.builtin.copy:
+        content: ''
+        dest: "{{ item }}"
+        backup: true
+      loop:
+        - /var/log/nginx/access.log
+        - /var/log/nginx/error.log
+    - name: Rotate mysql log files
+      ansible.builtin.copy:
+        content: ''
+        dest: /var/log/mysql/mysql-slow.log
+        backup: true
+    - name: Build Go App
+      ansible.builtin.command:
+        cmd: make all
+        chdir: /home/isucon/isuumo/webapp/go
+      become: true
+      become_user: isucon
+    - name: Restart systemd services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: restarted
+        daemon_reload: true
+        enabled: true
+      loop:
+        - isuumo.go
+        - mysql
+        - nginx
+    - name: Run sql/init.sh
+      ansible.builtin.command:
+          cmd: ./init.sh
+          chdir: /home/isucon/isuumo/webapp/mysql/db
+      become: true
+      become_user: isucon
