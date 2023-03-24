@@ -11,7 +11,7 @@
         #group: isucon
     - name: Sync nginx conf
       ansible.builtin.copy:
-        src: /contents/etc/mysql
+        src: /contents/etc/nginx
         dest: /etc/
     - name: Sync mysql conf
       ansible.builtin.copy:
@@ -24,16 +24,6 @@
         executable: /bin/bash
       become: true
       become_user: isucon
-    - name: Restart systemd services
-      ansible.builtin.systemd:
-        name: "{{ item }}"
-        state: restarted
-        daemon_reload: true
-        enabled: true
-      loop:
-        - isuumo.go
-        - mysql
-        - nginx
     - name: Run sql/init.sh
       ansible.builtin.shell:
           cmd: source ~/.bashrc && ./init.sh
@@ -41,6 +31,7 @@
           executable: /bin/bash
       become: true
       become_user: isucon
+    # serviceの再起動はログのローテートが終わってから
     - name: Rotate nginx log
       ansible.builtin.copy:
         content: ''
@@ -54,3 +45,13 @@
         content: ''
         dest: /var/log/mysql/mysql-slow.log
         backup: true
+    - name: Restart systemd services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: restarted
+        daemon_reload: true
+        enabled: true
+      loop:
+        - isuumo.go
+        - mysql
+        - nginx
