@@ -27,10 +27,10 @@
         loop_var: repo
       loop: "{{ apt_repositories }}"
 
-    - name: Update apt cache
+    - name: Update and upgrade packages
       ansible.builtin.apt:
         update_cache: true
-        cache_valid_time: 3600
+        upgrade: true
 
     - name: Install apt packages
       when: ansible_os_family == 'Debian'
