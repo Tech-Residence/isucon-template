@@ -12,6 +12,7 @@
       - "rsync"
       - "emacs"
       - "git"
+      - "percona-toolkit"
     arm64_binaries:
       - "https://github.com/tkuchiki/alp/releases/download/v1.0.12/alp_linux_arm64.zip"
       - "https://github.com/matsuu/kataribe/releases/download/v0.4.3/kataribe-v0.4.3_linux_arm64.zip"
