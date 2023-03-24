@@ -9,7 +9,10 @@ services:
         source: "./playbooks"
         target: "/playbooks"
       - type: bind
-        source: "./contents"
+        source: "./result"
+        target: "/result"
+      - type: bind
+        source: "./.contents"
         target: "/contents"
       - type: bind
         source: "$HOME/.ssh"
