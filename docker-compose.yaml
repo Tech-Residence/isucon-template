@@ -9,6 +9,9 @@ services:
         source: "./playbooks"
         target: "/playbooks"
       - type: bind
+        source: "./result"
+        target: "/result"
+      - type: bind
         source: "./contents"
         target: "/contents"
       - type: bind

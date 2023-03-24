@@ -1,0 +1,35 @@
+---
+- name: Analyze Logs
+  hosts: all
+  become: true
+  tasks:
+    - name: Get date
+      ansible.builtin.shell:
+        cmd: "TZ=Asia/Tokyo date +%H%M%S"
+      register: _date
+    - name: Print date
+      ansible.builtin.debug:
+        msg: "{{ _date.stdout }}"
+    - name: Create dirs
+      ansible.builtin.file:
+        path: /result/{{ _date.stdout }}
+        owner: root
+        group: root
+        mode: "0777"
+        state: directory
+    - name: Run alp
+      ansible.builtin.shell:
+        cmd: "alp json --file /var/log/nginx/access.log > /result/{{ _date.stdout }}/alp.log"
+    - name: Run pt-query-digest
+      ansible.builtin.shell:
+        cmd: "pt-query-digest /var/log/mysql/mysql-slow.log > /result/{{ _date.stdout }}/pt-query-digest.log"
+    - name: Fetch log files
+      ansible.builtin.fetch:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        flat: true
+      loop:
+        - { src: "/result/{{ _date.stdout}}/alp.log", dest: "/result/{{ _date.stdout }}/alp.log" }
+        - { src: "/result/{{ _date.stdout}}/pt-query-digest.log", dest: "/result/{{ _date.stdout }}/pt-query-digest.log" }
+        - { src: "/var/log/nginx/access.log", dest: "/result/{{ _date.stdout }}/access.log" }
+        - { src: "/var/log/mysql/mysql-slow.log", dest: "/result/{{ _date.stdout }}/mysql-slow.log" }

@@ -7,14 +7,31 @@
       ansible.builtin.copy:
         src: /contents/home/isucon/isuumo
         dest: /home/isucon/
+        #owner: isucon
+        #group: isucon
     - name: Sync nginx conf
       ansible.builtin.copy:
-        src: /contents/etc/mysql
+        src: /contents/etc/nginx
         dest: /etc/
     - name: Sync mysql conf
       ansible.builtin.copy:
         src: /contents/etc/mysql
         dest: /etc/
+    - name: Build Go App
+      ansible.builtin.shell:
+        cmd: source ~/.bashrc && make all
+        chdir: /home/isucon/isuumo/webapp/go
+        executable: /bin/bash
+      become: true
+      become_user: isucon
+    - name: Run sql/init.sh
+      ansible.builtin.shell:
+          cmd: source ~/.bashrc && ./init.sh
+          chdir: /home/isucon/isuumo/webapp/mysql/db
+          executable: /bin/bash
+      become: true
+      become_user: isucon
+    # serviceの再起動はログのローテートが終わってから
     - name: Rotate nginx log
       ansible.builtin.copy:
         content: ''
@@ -28,12 +45,6 @@
         content: ''
         dest: /var/log/mysql/mysql-slow.log
         backup: true
-    - name: Build Go App
-      ansible.builtin.command:
-        cmd: make all
-        chdir: /home/isucon/isuumo/webapp/go
-      become: true
-      become_user: isucon
     - name: Restart systemd services
       ansible.builtin.systemd:
         name: "{{ item }}"
@@ -44,9 +55,3 @@
         - isuumo.go
         - mysql
         - nginx
-    - name: Run sql/init.sh
-      ansible.builtin.command:
-          cmd: ./init.sh
-          chdir: /home/isucon/isuumo/webapp/mysql/db
-      become: true
-      become_user: isucon

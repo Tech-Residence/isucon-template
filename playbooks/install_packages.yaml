@@ -12,6 +12,7 @@
       - "rsync"
       - "emacs"
       - "git"
+      - "percona-toolkit"
     arm64_binaries:
       - "https://github.com/tkuchiki/alp/releases/download/v1.0.12/alp_linux_arm64.zip"
       - "https://github.com/matsuu/kataribe/releases/download/v0.4.3/kataribe-v0.4.3_linux_arm64.zip"
@@ -27,10 +28,10 @@
         loop_var: repo
       loop: "{{ apt_repositories }}"
 
-    - name: Update apt cache
+    - name: Update and upgrade packages
       ansible.builtin.apt:
         update_cache: true
-        cache_valid_time: 3600
+        upgrade: true
 
     - name: Install apt packages
       when: ansible_os_family == 'Debian'
