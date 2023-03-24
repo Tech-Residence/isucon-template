@@ -12,7 +12,7 @@ services:
         source: "./result"
         target: "/result"
       - type: bind
-        source: "./.contents"
+        source: "./contents"
         target: "/contents"
       - type: bind
         source: "$HOME/.ssh"
