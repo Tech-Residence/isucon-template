@@ -5,7 +5,7 @@
   tasks:
     - name: Get date
       ansible.builtin.shell:
-        cmd: "TZ=Asia/Tokyo date +%H%M%S"
+        cmd: "TZ=Asia/Tokyo date --iso-8601=minutes"
       register: _date
     - name: Print date
       ansible.builtin.debug:
@@ -31,5 +31,6 @@
       loop:
         - { src: "/result/{{ _date.stdout}}/alp.log", dest: "/result/{{ _date.stdout }}/alp.log" }
         - { src: "/result/{{ _date.stdout}}/pt-query-digest.log", dest: "/result/{{ _date.stdout }}/pt-query-digest.log" }
-        - { src: "/var/log/nginx/access.log", dest: "/result/{{ _date.stdout }}/access.log" }
-        - { src: "/var/log/mysql/mysql-slow.log", dest: "/result/{{ _date.stdout }}/mysql-slow.log" }
+        # 生ログはサイズが大きくてコピーに時間がかかるので普段はコメントアウトしておく
+        #- { src: "/var/log/nginx/access.log", dest: "/result/{{ _date.stdout }}/access.log" }
+        #- { src: "/var/log/mysql/mysql-slow.log", dest: "/result/{{ _date.stdout }}/mysql-slow.log" }
