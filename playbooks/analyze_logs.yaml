@@ -5,7 +5,7 @@
   tasks:
     - name: Get date
       ansible.builtin.shell:
-        cmd: "TZ=Asia/Tokyo date +%H%M%S"
+        cmd: "TZ=Asia/Tokyo date %Y-%m-%dT%H:%M:%S%z"
       register: _date
     - name: Print date
       ansible.builtin.debug:
