@@ -22,20 +22,22 @@ ISUCON用のテンプレートリポジトリ
 
 #### 大会用リポジトリの用意
 
-このリポジトリをフォークして試合専用のリポジトリを作成しておく。フォーク先のリポジトリは**必ずprivateリポジトリにする**よう注意。
+このリポジトリをフォークして試合専用のリポジトリを作成する。
+
+> **Warning**
+>　ISUCONの大会本番では必ずprivateリポジトリにすること。競技中に問題を外部公開してしまうと失格になる。
 
 #### サーバー接続用の秘密鍵の設定
 
 サーバーに接続するための鍵を大会参加登録時に登録したと思うので、その鍵を設定しておく。
 プロジェクト直下に`.env`ファイルを作成して`PRIVATE_KEY`変数の値として記載する。
 
-注意点:
-- `$HOME/.ssh`以下にあるファイルしか使えない
-- フルパスではなくファイル名のみ記載する
-- ISUCON本番は参加登録時に申請した鍵
+> **Note**
+> - `$HOME/.ssh`以下にあるファイルしか使えない
+> - フルパスではなくファイル名のみ記載する
+> - ISUCON本番は参加登録時に申請した鍵
 
-サンプル
-
+e.g.)
 ```
 PRIVATE_KEY="id_ed25519"
 ```
@@ -48,65 +50,81 @@ ansibleの実行もGoコードのビルドも基本的にはすべてコンテ�
 make container-build
 ```
 
-### 大会当日の使い方
+### 環境配布後の修正
 
-下記の順番で実行する。
+当日の環境に合わせて設定変更が必要なところ。問題を解き始める前に行う。
 
 #### インベントリファイルの作成
 
 サーバー情報を`playbooks/inventory.ini`に記入してgit pushする。
+最低限必要な情報は `ansible_host` と `ansible_user` の2つ。
 
 #### パッケージインストール
 
-必要なパッケージをサーバーにインストールする。
+必要なパッケージを全サーバーにインストールする。
 
 ```
 make install-packages-all
 ```
 
-完了まで数分かかるが、待たずに次の作業を進めることができる。
+> **Note**
+> 個別にインストールしたいときは、`make install-packages-N` でN番目のサーバのみにパッケージをインストールすることもできる。
+
+> **Note**
+> 完了まで数分かかるが、待たずに次の作業を進めることができる。
 
 #### コンテンツのコピー
 
 必要なファイルをサーバーから`contents`ディレクトリにコピーする。
 
-注意点:
-
-- 大会ごとに必要なファイルは異なる。
-- `/home`, `/etc` 以下すべてをrsyncしてくると、ファイル数もサイズも大きすぎでgit管理できなくなるため必要なファイルだけ選ぶ
-- `/etc`　以下はシンボリックリンクが多いので注意。シンボリックリンクをrsyncしてきても編集はできない。
-
-以下のファイルは対象となることが多いので必ずチェックする
-
-- アプリケーションファイル
-  - `/home/isucon` などに配置されることが多い
-- nginxの設定ファル
-  - `/etc/nginx/nginx.conf` に配置されることが多い。見つからないときは、(`nginx -V`コマンドで確認できる。)
-  - `/etc/nginx/nginx.conf` のなかで別ファイルをincludeしていることも多いのでそれらのファイルもチェックする。記述量次第では`nginx.conf`にすべてまとめてしまうといいかもしれない。
-- mysqlの設定ファイル
-  - `/etc/my.cnf` に配置されることが多い。見つからないときは、(`mysqld --verbose --help | grep -A 1 "Default options"` コマンドで確認できる。)
-- systemdのserviceファイル
-  - `/etc/systemd/system` 以下に配置されることが多い。
-
-(例)
-```
-mkdir -p ./contents/home/isucon
-rsync -av $USER@$IP:/home/isucon/env.sh ./contents/home/isucon/
-mkdir -p contents/home/isucon/isuumo/webapp
-rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/Makefile ./contents/home/isucon/isuumo/webapp
-rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/docker-compose ./contents/home/isucon/isuumo/webapp/
-rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/fixture ./contents/home/isucon/isuumo/webapp/
-rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/go ./contents/home/isucon/isuumo/webapp/
-rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/mysql ./contents/home/isucon/isuumo/webapp/
-rsync -avz ubuntu@43.206.253.80:/home/isucon/isuumo/webapp/nginx ./contents/home/isucon/isuumo/webapp/
-mkdir -p contents/etc/nginx
-rsync -avz ubuntu@43.206.253.80:/etc/nginx/nginx.conf ./contents/etc/nginx
-
-➜ mkdir -p contents/etc/mysql
-rsync -avz ubuntu@43.206.253.80:/etc/mysql ./contents/etc/
-...
-```
+> **Note**
+> - 大会ごとに必要なファイルは異なる。
+> - `/home`, `/etc` 以下すべてをrsyncしてくると、ファイル数もサイズも大きすぎでgit管理できなくなるため必要なファイルだけ選ぶ
+> - `/etc`　以下はシンボリックリンクが多いので注意。シンボリックリンクをrsyncしてきても編集はできない。
+>
+> 以下のファイルは対象となることが多いので必ずチェックする
+>
+> - アプリケーションファイル
+>   - `/home/isucon` などに配置されることが多い
+> - nginxの設定ファル
+>   - `/etc/nginx/nginx.conf` に配置されることが多い。見つからないときは、(`nginx -V`コマンドで確認できる。)
+>   - `/etc/nginx/nginx.conf` のなかで別ファイルをincludeしていることも多いのでそれらのファイルもチェックする。記述量次第では`nginx.conf`にすべてまとめてしまうといいかもしれない。
+> - mysqlの設定ファイル
+>   - `/etc/my.cnf` に配置されることが多い。見つからないときは、(`mysqld --verbose --help | grep -A 1 "Default options"` コマンドで確認できる。)
+> - systemdのserviceファイル
+>   - `/etc/systemd/system` 以下に配置されることが多い。
 
 #### prepare_bench.yamlの修正
 
-(後で記載する)
+- 各種ファイルパス・パーミッション
+- ビルドコマンド
+- systemdのservice名
+
+などを変更する。
+
+### 大会中の使い方
+
+#### ベンチマークの準備
+
+次のコマンドでベンチマーク前に必要な処理が実行される。
+
+```
+make prepare-bench-N
+```
+"N"は実行対象のサーバー番号 (1, 2, 3のいずれか)
+
+実行される処理は以下の通り、
+
+1. `contents`以下のファイルをサーバーの適切なパスにコピー
+2. Goコードのビルド
+3. SQLファイルの実行
+4. Logのローテート
+5. systemdサービスのリスタート
+
+#### ログの解析
+
+ベンチマーク実行後にログを解析して結果をサーバーからローカルの`result`ディレクトリにコピーする。
+
+```
+make analyze-logs-N
+```
