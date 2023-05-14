@@ -20,6 +20,10 @@ install-packages-%:
 prepare-bench-%:
 	docker-compose run ansible-runner ansible-playbook prepare_bench.yaml --private-key="/tmp/.ssh/$(PRIVATE_KEY)" --limit server-${@:prepare-bench-%=%}
 
+.PHONY: prepare-bench-all
+prepare-bench-all:
+	docker-compose run ansible-runner ansible-playbook prepare_bench.yaml --private-key="/tmp/.ssh/$(PRIVATE_KEY)"
+
 .PHONY: analyze-logs-%
 analyze-logs-%:
 	docker-compose run ansible-runner ansible-playbook analyze_logs.yaml --private-key="/tmp/.ssh/$(PRIVATE_KEY)" --limit server-${@:analyze-logs-%=%}
