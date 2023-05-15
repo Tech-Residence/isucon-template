@@ -40,5 +40,9 @@ lint-install-packages:
 lint-prepare-bench:
 	docker-compose run ansible-runner ansible-lint prepare_bench.yaml
 
+.PHONY: lint-analyze-logs
+lint-analyze-logs:
+	docker-compose run ansible-runner ansible-lint analyze_logs.yaml
+
 .PHONY: lint-all
-lint-all: lint-install-packages lint-prepare-bench
+lint-all: lint-install-packages lint-prepare-bench lint-analyze-logs
