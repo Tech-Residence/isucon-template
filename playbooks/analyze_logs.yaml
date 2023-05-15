@@ -4,10 +4,13 @@
   become: true
   tasks:
     - name: Get date
-      ansible.builtin.shell:
-        cmd: "TZ=Asia/Tokyo date --iso-8601=minutes"
+      ansible.builtin.command:
+        cmd: "date --iso-8601=minutes"
+      environment:
+        TZ: Asia/Tokyo
       register: _date
       delegate_to: localhost
+      changed_when: false
     - name: Print date
       ansible.builtin.debug:
         msg: "{{ _date.stdout }}"
@@ -32,10 +35,10 @@
         dest: "{{ item.dest }}"
         flat: true
       loop:
-        - { src: "/result/{{ _date.stdout}}/alp.log", dest: "/result/{{ _date.stdout }}/alp-{{ inventory_hostname }}.log" }
+        - {src: "/result/{{ _date.stdout }}/alp.log", dest: "/result/{{ _date.stdout }}/alp-{{ inventory_hostname }}.log"}
         # 生ログはサイズが大きくてコピーに時間がかかるので普段はコメントアウトしておく
-        #- { src: "/var/log/nginx/access.log", dest: "/result/{{ _date.stdout }}/access-{{ inventory_hostname }}.log" }
-        #- { src: "/var/log/nginx/error.log", dest: "/result/{{ _date.stdout }}/error-{{ inventory_hostname }}.log" }
+        # - { src: "/var/log/nginx/access.log", dest: "/result/{{ _date.stdout }}/access-{{ inventory_hostname }}.log" }
+        # - { src: "/var/log/nginx/error.log", dest: "/result/{{ _date.stdout }}/error-{{ inventory_hostname }}.log" }
       when: "'proxy' in group_names"
     - name: Fetch mysql log files
       ansible.builtin.fetch:
@@ -43,7 +46,7 @@
         dest: "{{ item.dest }}"
         flat: true
       loop:
-        - { src: "/result/{{ _date.stdout}}/pt-query-digest.log", dest: "/result/{{ _date.stdout }}/pt-query-digest-{{ inventory_hostname }}.log" }
+        - {src: "/result/{{ _date.stdout }}/pt-query-digest.log", dest: "/result/{{ _date.stdout }}/pt-query-digest-{{ inventory_hostname }}.log"}
         # 生ログはサイズが大きくてコピーに時間がかかるので普段はコメントアウトしておく
-        #- { src: "/var/log/mysql/mysql-slow.log", dest: "/result/{{ _date.stdout }}/mysql-slow-{{ inventory_hostname }}.log" }
+        # - { src: "/var/log/mysql/mysql-slow.log", dest: "/result/{{ _date.stdout }}/mysql-slow-{{ inventory_hostname }}.log" }
       when: "'db' in group_names"
