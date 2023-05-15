@@ -131,3 +131,5 @@ dmypy.json
 cloud-init.yaml
 
 .contents
+
+*.log

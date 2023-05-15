@@ -21,10 +21,16 @@
       ansible.builtin.copy:
         src: /contents/etc/nginx
         dest: /etc/
+        owner: root
+        group: root
+        mode: '0644'
     - name: Rotate nginx log
       ansible.builtin.copy:
         content: ''
         dest: "{{ item }}"
+        owner: www-data
+        group: adm
+        mode: '0644'
         backup: true
       loop:
         - /var/log/nginx/access.log
@@ -46,6 +52,7 @@
         dest: /home/isucon/
         owner: isucon
         group: isucon
+        mode: '0644'
     - name: Build Go App
       ansible.builtin.shell:
         cmd: source ~/.bashrc && make all
@@ -53,6 +60,8 @@
         executable: /bin/bash
       become: true
       become_user: isucon
+      register: result
+      changed_when: "'Nothing to be done' not in result.stdout"
     - name: Restart app service
       ansible.builtin.systemd:
         name: isuumo.go
@@ -68,17 +77,24 @@
       ansible.builtin.copy:
         src: /contents/etc/mysql
         dest: /etc/
+        owner: root
+        group: root
+        mode: '0644'
     - name: Sync my.cnf
       ansible.builtin.copy:
         src: /contents/etc/my.cnf
         dest: /etc/my.cnf
+        owner: root
+        group: root
+        mode: '0644'
     - name: Run sql/init.sh
       ansible.builtin.shell:
-          cmd: source ~/.bashrc && ./init.sh
-          chdir: /home/isucon/isuumo/webapp/mysql/db
-          executable: /bin/bash
+        cmd: source ~/.bashrc && ./init.sh
+        chdir: /home/isucon/isuumo/webapp/mysql/db
+        executable: /bin/bash
       become: true
       become_user: isucon
+      changed_when: true
     - name: Rotate mysql log files
       ansible.builtin.copy:
         content: ''
@@ -86,6 +102,7 @@
         backup: true
         owner: mysql
         group: adm
+        mode: '0644'
     - name: Restart mysql services
       ansible.builtin.systemd:
         name: mysql.service
