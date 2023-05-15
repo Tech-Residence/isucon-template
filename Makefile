@@ -28,6 +28,10 @@ prepare-bench-all:
 analyze-logs-%:
 	docker-compose run ansible-runner ansible-playbook analyze_logs.yaml --private-key="/tmp/.ssh/$(PRIVATE_KEY)" --limit server-${@:analyze-logs-%=%}
 
+.PHONY: analyze-logs-all
+analyze-logs-all:
+	docker-compose run ansible-runner ansible-playbook analyze_logs.yaml --private-key="/tmp/.ssh/$(PRIVATE_KEY)"
+
 .PHONY: lint-install-packages
 lint-install-packages:
 	docker-compose run ansible-runner ansible-lint install_packages.yaml
