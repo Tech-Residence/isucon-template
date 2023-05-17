@@ -1,0 +1,37 @@
+name: ansible-lint
+
+on:
+  push:
+    paths:
+      - ".github/workflows/ansible-lint.yaml"
+      - "playbooks/*.yaml"
+
+jobs:
+  build_and_lint:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Docker build
+      uses: docker/build-push-action@v4
+      with:
+        load: true
+        context: .
+        tags: ansible-runner:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Create .env file
+      run: touch .env
+
+    - name: Create ssh directory
+      run: mkdir -p ~/.ssh
+
+    - name: Run make lint-all inside Docker container
+      run: make lint-all
