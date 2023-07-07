@@ -21,7 +21,9 @@ echo-test-server-ip: launch-test-server
 	echo $(shell multipass info isucon-template-test --format json | jq -r '.info."$(VM_NAME)".ipv4[0]')
 
 tmp/inventory: launch-test-server
-	@echo "[all]" > tmp/inventory.ini
+	@echo "[proxy]" > tmp/inventory.ini
+	@echo "server-1 ansible_host=$(shell multipass info isucon-template-test --format json | jq -r '.info."$(VM_NAME)".ipv4[0]')" >> tmp/inventory.ini
+	@echo "[db]" >> tmp/inventory.ini
 	@echo "server-1 ansible_host=$(shell multipass info isucon-template-test --format json | jq -r '.info."$(VM_NAME)".ipv4[0]')" >> tmp/inventory.ini
 	@echo "[all:vars]" >> tmp/inventory.ini
 	@echo "ansible_user=ubuntu" >> tmp/inventory.ini
@@ -45,3 +47,11 @@ install-packages:
 .PHONY: prepare-bench
 prepare-bench:
 	docker-compose run ansible-runner ansible-playbook prepare_bench.yaml -i /home/ubuntu/tmp/inventory.ini --private-key="/home/ubuntu/tmp/id_ed25519"
+
+.PHONY: check-dev-server-state
+check-dev-server-state:
+	docker compose run ansible-runner ansible-playbook check_dev_server_state.yaml -i /home/ubuntu/tmp/inventory.ini --private-key="/home/ubuntu/tmp/id_ed25519"
+
+.PHONY: check-final-server-state
+check-final-server-state:
+	docker compose run ansible-runner ansible-playbook check_final_server_state.yaml -i /home/ubuntu/tmp/inventory.ini --private-key="/home/ubuntu/tmp/id_ed25519"
