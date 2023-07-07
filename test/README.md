@@ -21,6 +21,7 @@ make start-test-server
 ```
 
 内部では以下の操作が行われる。
+
 1. VM接続用のSSH鍵ペアの作成　(`tmp/id_ed25519`, `tmp/id_ed25519.pub`)
 2. VMの設定ファイルの作成（`tmp/cloud-init.yaml`）
 3. test用のinventoryファイルの作成（`tmp/inventory.ini`）
@@ -42,8 +43,17 @@ server-1 | SUCCESS => {
 }
 ```
 
-###　動作確認用VMの停止
+### 動作確認用VMの停止
 
 ```
 make destroy-test-server
+```
+
+
+### Tips
+
+#### VMに直接ログインしたい場合
+
+```
+multipass shell isucon-template-test
 ```
