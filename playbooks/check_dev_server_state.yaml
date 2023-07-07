@@ -1,0 +1,8 @@
+---
+- name: Check Development Server State
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Nginx State
+      ansible.builtin.import_tasks:
+        file: tasks/check_dev_server_state/check_nginx.yaml

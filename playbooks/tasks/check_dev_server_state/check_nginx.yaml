@@ -1,0 +1,39 @@
+---
+- name: Get nginx status
+  ansible.builtin.command: systemctl is-active nginx
+  register: nginx_status
+  changed_when: false
+  ignore_errors: true
+
+- name: Get nginx configuration
+  ansible.builtin.command: nginx -T
+  register: nginx_config
+  changed_when: false
+  ignore_errors: true
+
+- name: Check nginx status
+  ansible.builtin.set_fact:
+    is_currentry_active: "{{ nginx_status.stdout == 'active'}}"
+    is_access_log_path_correct: "{{ nginx_config.stdout_lines | select('match', '^\\s*access_log /var/log/nginx/access.log;.*') | list | count > 0 }}"
+    is_error_log_path_correct: "{{ nginx_config.stdout_lines | select('match', '^\\s*error_log /var/log/nginx/error.log;.*') | list | count > 0 }}"
+
+- name: Verify all checks have passed
+  ansible.builtin.set_fact:
+    is_all_checks_passed: "{{ is_currentry_active and is_access_log_path_correct and is_error_log_path_correct }}"
+
+- name: Show nginx status
+  ansible.builtin.debug:
+    msg:
+      - "Nginx service is currently active: {{ is_currentry_active }}"
+      - "Access log path is correct: {{ is_access_log_path_correct }}"
+      - "Error log path is correct: {{ is_error_log_path_correct }}"
+
+- name: Fail if any checks did not pass
+  ansible.builtin.fail:
+    msg: "Not all checks have passed."
+  when: not is_all_checks_passed
+
+- name: All checks have passed
+  ansible.builtin.debug:
+    msg: "All checks have passed."
+  when: is_all_checks_passed

@@ -1,0 +1,4 @@
+---
+- name: Check Final Server State
+  hosts: all
+  become: true
