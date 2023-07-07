@@ -9,7 +9,7 @@
         state: stopped
         enabled: false
       loop:
-        - isuumo.go
+        #- isuumo.go
         - mysql
         - nginx
 
@@ -17,95 +17,22 @@
   hosts: proxy
   become: true
   tasks:
-    - name: Sync nginx conf
-      ansible.builtin.copy:
-        src: /contents/etc/nginx
-        dest: /etc/
-        owner: root
-        group: root
-        mode: '0644'
-    - name: Rotate nginx log
-      ansible.builtin.copy:
-        content: ''
-        dest: "{{ item }}"
-        owner: www-data
-        group: adm
-        mode: '0644'
-        backup: true
-      loop:
-        - /var/log/nginx/access.log
-        - /var/log/nginx/error.log
-    - name: Restart nginx.service
-      ansible.builtin.systemd:
-        name: nginx.service
-        state: restarted
-        daemon_reload: true
-        enabled: true
+    - name: Setup proxy
+      ansible.builtin.import_tasks:
+        file: tasks/prepare_bench/setup_proxy.yaml
 
 - name: Setup app
   hosts: app
   become: true
   tasks:
-    - name: Sync app code
-      ansible.builtin.copy:
-        src: /contents/home/isucon/isuumo
-        dest: /home/isucon/
-        owner: isucon
-        group: isucon
-        mode: '0644'
-    - name: Build Go App
-      ansible.builtin.shell:
-        cmd: source ~/.bashrc && make all
-        chdir: /home/isucon/isucari/webapp/go
-        executable: /bin/bash
-      become: true
-      become_user: isucon
-      register: result
-      changed_when: "'Nothing to be done' not in result.stdout"
-    - name: Restart app service
-      ansible.builtin.systemd:
-        name: isuumo.go
-        state: restarted
-        daemon_reload: true
-        enabled: true
+    - name: Setup app
+      ansible.builtin.import_tasks:
+        file: tasks/prepare_bench/setup_app.yaml
 
 - name: Setup db
   hosts: db
   become: true
   tasks:
-    - name: Sync mysql conf
-      ansible.builtin.copy:
-        src: /contents/etc/mysql
-        dest: /etc/
-        owner: root
-        group: root
-        mode: '0644'
-    - name: Sync my.cnf
-      ansible.builtin.copy:
-        src: /contents/etc/my.cnf
-        dest: /etc/my.cnf
-        owner: root
-        group: root
-        mode: '0644'
-    - name: Run sql/init.sh
-      ansible.builtin.shell:
-        cmd: source ~/.bashrc && ./init.sh
-        chdir: /home/isucon/isuumo/webapp/mysql/db
-        executable: /bin/bash
-      become: true
-      become_user: isucon
-      changed_when: true
-    - name: Rotate mysql log files
-      ansible.builtin.copy:
-        content: ''
-        dest: /var/log/mysql/mysql-slow.log
-        backup: true
-        owner: mysql
-        group: adm
-        mode: '0644'
-    - name: Restart mysql services
-      ansible.builtin.systemd:
-        name: mysql.service
-        state: restarted
-        daemon_reload: true
-        enabled: true
+    - name: Setup db
+      ansible.builtin.import_tasks:
+        file: tasks/prepare_bench/setup_db.yaml

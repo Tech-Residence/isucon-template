@@ -1,0 +1,25 @@
+---
+- name: Sync nginx conf
+  ansible.builtin.copy:
+    src: /contents/etc/nginx
+    dest: /etc/
+    owner: root
+    group: root
+    mode: '0644'
+- name: Rotate nginx log
+  ansible.builtin.copy:
+    content: ''
+    dest: "{{ item }}"
+    owner: www-data
+    group: adm
+    mode: '0644'
+    backup: true
+  loop:
+    - /var/log/nginx/access.log
+    - /var/log/nginx/error.log
+- name: Restart nginx.service
+  ansible.builtin.systemd:
+    name: nginx.service
+    state: restarted
+    daemon_reload: true
+    enabled: true

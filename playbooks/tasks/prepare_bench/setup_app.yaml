@@ -1,0 +1,23 @@
+---
+- name: Sync app code
+  ansible.builtin.copy:
+    src: /contents/home/isucon/isuumo
+    dest: /home/isucon/
+    owner: isucon
+    group: isucon
+    mode: '0644'
+- name: Build Go App
+  ansible.builtin.shell:
+    cmd: source ~/.bashrc && make all
+    chdir: /home/isucon/isucari/webapp/go
+    executable: /bin/bash
+  become: true
+  become_user: isucon
+  register: result
+  changed_when: "'Nothing to be done' not in result.stdout"
+- name: Restart app service
+  ansible.builtin.systemd:
+    name: isuumo.go
+    state: restarted
+    daemon_reload: true
+    enabled: true

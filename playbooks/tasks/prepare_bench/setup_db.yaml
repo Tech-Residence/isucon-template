@@ -1,0 +1,37 @@
+---
+- name: Sync mysql conf
+  ansible.builtin.copy:
+    src: /contents/etc/mysql
+    dest: /etc/
+    owner: root
+    group: root
+    mode: '0644'
+- name: Sync my.cnf
+  ansible.builtin.copy:
+    src: /contents/etc/my.cnf
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: '0644'
+- name: Run sql/init.sh
+  ansible.builtin.shell:
+    cmd: source ~/.bashrc && ./init.sh
+    chdir: /home/isucon/isuumo/webapp/mysql/db
+    executable: /bin/bash
+  become: true
+  become_user: isucon
+  changed_when: true
+- name: Rotate mysql log files
+  ansible.builtin.copy:
+    content: ''
+    dest: /var/log/mysql/mysql-slow.log
+    backup: true
+    owner: mysql
+    group: adm
+    mode: '0644'
+- name: Restart mysql services
+  ansible.builtin.systemd:
+    name: mysql.service
+    state: restarted
+    daemon_reload: true
+    enabled: true
