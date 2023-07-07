@@ -43,12 +43,25 @@ server-1 | SUCCESS => {
 }
 ```
 
+### 各playbookの動作確認
+
+```
+make install_packages
+```
+
+```
+make prepare_bench
+```
+
+```
+make check_dev_server_state
+```
+
 ### 動作確認用VMの停止
 
 ```
 make destroy-test-server
 ```
-
 
 ### Tips
 
