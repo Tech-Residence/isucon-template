@@ -1,0 +1,23 @@
+#cloud-config
+timezone: Asia/Tokyo
+
+system_info:
+  default_user:
+    name: ubuntu
+    plain_text_passwd: ubuntu
+    home: /home/ubuntu
+    shell: /bin/bash
+    groups: [sudo]
+    ssh_authorized_keys:
+      - #{ssh_pub_key}
+
+packages:
+  - nginx
+  - mysql-server
+
+runcmd:
+  - systemctl restart sshd
+  - systemctl enable nginx
+  - systemctl start nginx
+  - systemctl enable mysql
+  - systemctl start mysql

@@ -133,3 +133,5 @@ cloud-init.yaml
 .contents
 
 *.log
+
+test/tmp

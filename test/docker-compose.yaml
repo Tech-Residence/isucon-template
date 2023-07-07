@@ -1,0 +1,25 @@
+---
+version: '3'
+services:
+  ansible-runner:
+    image: ansible-runner:latest
+    build:
+      context: ..
+    volumes:
+      - type: bind
+        source: "../playbooks"
+        target: "/playbooks"
+      - type: bind
+        source: "../result"
+        target: "/result"
+      - type: bind
+        source: "./contents"
+        target: "/contents"
+      - type: bind
+        source: "./tmp"
+        target: "/home/ubuntu/tmp"
+      #- type: bind
+      #  source: "$HOME/.ssh"
+      # target: "/tmp/.ssh"
+    working_dir: /playbooks
+    tty: true
