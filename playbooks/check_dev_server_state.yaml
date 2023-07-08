@@ -9,3 +9,7 @@
     - name: Check MySQL State
       ansible.builtin.import_tasks:
         file: tasks/check_dev_server_state/check_mysql.yaml
+    - name: Check OS State
+      ansible.builtin.import_tasks:
+        file: tasks/check_dev_server_state/check_os.yaml
+
