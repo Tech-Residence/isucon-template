@@ -33,6 +33,11 @@ make start-test-server
 
 ```
 make ping-test-server
+```
+
+以下のような出力が得られればOK。
+
+```
 docker-compose run ansible-runner ansible -m ping all -i /home/ubuntu/tmp/inventory.ini --private-key="/home/ubuntu/tmp/id_ed25519"
 server-1 | SUCCESS => {
     "ansible_facts": {
@@ -46,15 +51,15 @@ server-1 | SUCCESS => {
 ### 各playbookの動作確認
 
 ```
-make install_packages
+make install-packages
 ```
 
 ```
-make prepare_bench
+make prepare-bench
 ```
 
 ```
-make check_dev_server_state
+make check-dev-server-state
 ```
 
 ### 動作確認用VMの停止
