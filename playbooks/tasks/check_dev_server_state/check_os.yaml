@@ -5,17 +5,14 @@
   register: soft_limit
   changed_when: False
 
-- name: Set fact for soft limit check
-  set_fact:
-    is_os_soft_limit_sufficient: "{{ soft_limit.stdout|int >= 2048 }}"
-
 - name: Check hard limit of file descriptors
   command: cat /proc/sys/fs/file-max
   register: hard_limit
   changed_when: False
 
-- name: Set fact for hard limit check
+- name: Set fact for os limit check
   set_fact:
+    is_os_soft_limit_sufficient: "{{ soft_limit.stdout|int >= 2048 }}"
     is_os_hard_limit_sufficient: "{{ hard_limit.stdout|int >= 2048 }}"
 
 - name: Check if all limits are sufficient
