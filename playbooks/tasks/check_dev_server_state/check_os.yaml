@@ -1,21 +1,39 @@
 ---
 - name: Check soft limit of file descriptors
+# description: `ulimit`コマンドがshell組込みのため、commandモジュールではなくshellモジュールを使用する
   shell: ulimit -n
   register: soft_limit
   changed_when: False
 
-- name: Verify soft limit is sufficient
-  fail:
-    msg: "Soft limit of file descriptors is less than 2048"
-  when: soft_limit.stdout|int < 2048
+- name: Set fact for soft limit check
+  set_fact:
+    is_os_soft_limit_sufficient: "{{ soft_limit.stdout|int >= 2048 }}"
 
 - name: Check hard limit of file descriptors
-  shell: cat /proc/sys/fs/file-max
+  command: cat /proc/sys/fs/file-max
   register: hard_limit
   changed_when: False
 
-- name: Verify hard limit is sufficient
+- name: Set fact for hard limit check
+  set_fact:
+    is_os_hard_limit_sufficient: "{{ hard_limit.stdout|int >= 2048 }}"
+
+- name: Check if all limits are sufficient
+  set_fact:
+    is_all_os_checks_passed: "{{ is_os_soft_limit_sufficient and is_os_hard_limit_sufficient }}"
+
+- name: Show os status
+  debug:
+    msg:
+      - "Soft limit is sufficient: {{ is_os_soft_limit_sufficient }}"
+      - "Hard limit is sufficient: {{ is_os_hard_limit_sufficient }}"
+
+- name: Fail if any checks did not pass
   fail:
-    msg: "Hard limit of file descriptors is less than 2048"
-  when: hard_limit.stdout|int < 2048
-  
+    msg: "Not all os checks have passed."
+  when: not is_all_os_checks_passed
+
+- name: All checks have passed
+  debug:
+    msg: "All os checks have passed."
+  when: is_all_os_checks_passed
