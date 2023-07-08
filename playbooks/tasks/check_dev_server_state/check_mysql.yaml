@@ -1,0 +1,66 @@
+---
+- name: Get slow query logging status
+  ansible.builtin.command: mysql -u root -proot -e "show variables like 'slow_query_log'"
+  register: slow_query_logging_status
+  changed_when: false
+
+- name: Get slow query logging path
+  ansible.builtin.command: mysql -u root -proot -e "show variables like 'slow_query_log_file'"
+  register: slow_query_logging_path
+  changed_when: false
+
+- name: Get slow query long_query_time
+  ansible.builtin.command: mysql -u root -proot -e "show variables like 'long_query_time'"
+  register: slow_query_long_query_time
+  changed_when: false
+
+- name: Get mysql user database hosts
+  ansible.builtin.command: mysql -u root -proot -e "select Host, User from mysql.user where User = 'root'"
+  register: mysql_user_database_hosts
+  changed_when: false
+
+- name: Get config database bind-address
+  ansible.builtin.command: mysql -u root -proot -e "show global variables like 'bind_address'"
+  register: mysql_bind_address
+  changed_when: false
+
+# - name: Get mysql port
+#   ansible.builtin.command: mysql -u root -proot -e "show variables like 'port'" | grep "port" | awk '{print $NF}'
+#   register: mysql_port
+#   changed_when: false
+
+# - name: Get firewall database port status
+#   ansible.builtin.command: ufw status | grep {{ mysql_port.stdout }}
+#   register: mysql_ufw_status
+#   changed_when: false
+
+- name: Check responses
+  ansible.builtin.set_fact:
+    is_slow_query_enabled: "{{ 'ON' in slow_query_logging_status.stdout }}"
+    is_slow_query_logging_path_expected: " {{ '/var/log/mysql/mysql-slow.log' in slow_query_logging_path.stdout }}"
+    is_slow_query_long_query_time_expected: "{{ (slow_query_long_query_time.stdout | regex_search('[0-9\\.]+', multiline=True) | float) < 1e-5 }}"
+    is_host_accessible_externally: "{{ '%' in mysql_user_database_hosts.stdout }}"
+    is_bind_address_all: "{{ '0.0.0.0' in mysql_bind_address.stdout }}"
+
+- name: Verify all checks have passed
+  ansible.builtin.set_fact:
+    have_all_checks_passed: "{{ is_slow_query_enabled and is_slow_query_logging_path_expected and is_slow_query_long_query_time_expected and is_host_accessible_externally and is_bind_address_all }}"
+
+- name: Show mysql status
+  ansible.builtin.debug:
+    msg:
+      - "Slow query enabled: {{ is_slow_query_enabled }}"
+      - "Slow query logging path expected: {{ is_slow_query_logging_path_expected }}"
+      - "Slow query logging path: {{ slow_query_logging_path.stdout }}"
+      - "Host accessible externally: {{ is_host_accessible_externally }}"
+      - "Any IP address bound: {{ is_bind_address_all }}"
+
+- name: Fail if any checks did not pass
+  ansible.builtin.fail:
+    msg: "Not all checks have passed."
+  when: not have_all_checks_passed
+
+- name: All checks have passed
+  ansible.builtin.debug:
+    msg: "All checks have passed."
+  when: have_all_checks_passed
