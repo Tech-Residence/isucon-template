@@ -1,12 +1,7 @@
 ---
-- name: Check soft limit of filedescriptors
+- name: Check soft limit of file descriptors
   shell: ulimit -n
   register: soft_limit
-  changed_when: False
-
-- name: Check hard limit of file descriptors
-  shell: cat /proc/sys/fsfile-max
-  register: hard_limit
   changed_when: False
 
 - name: Verify soft limit is sufficient
@@ -14,7 +9,13 @@
     msg: "Soft limit of file descriptors is less than 2048"
   when: soft_limit.stdout|int < 2048
 
+- name: Check hard limit of file descriptors
+  shell: cat /proc/sys/fs/file-max
+  register: hard_limit
+  changed_when: False
+
 - name: Verify hard limit is sufficient
   fail:
     msg: "Hard limit of file descriptors is less than 2048"
   when: hard_limit.stdout|int < 2048
+  
