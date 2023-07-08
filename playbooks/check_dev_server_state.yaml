@@ -6,3 +6,6 @@
     - name: Check Nginx State
       ansible.builtin.import_tasks:
         file: tasks/check_dev_server_state/check_nginx.yaml
+    - name: Check MySQL State
+      ansible.builtin.import_tasks:
+        file: tasks/check_dev_server_state/check_mysql.yaml
