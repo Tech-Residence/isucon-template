@@ -51,4 +51,4 @@
       loop:
         - {"group": "proxy", "service": "{{ proxy_service }}"}
         - {"group": "app", "service": "{{ app_service }}"}
-        - {"group": "db", "service": "{{ d b_service }}"}
+        - {"group": "db", "service": "{{ db_service }}"}
