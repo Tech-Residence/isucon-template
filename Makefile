@@ -40,10 +40,6 @@ check-dev-server-state-all:
 check-final-server-state-all:
 	docker compose run ansible-runner ansible-playbook check_final_server_state.yaml --private-key="/tmp/.ssh/$(PRIVATE_KEY)"
 
-.PHONY: analyze-logs-all
-analyze-logs-all:
-	docker compose run ansible-runner ansible-playbook analyze_logs.yaml --private-key="/tmp/.ssh/$(PRIVATE_KEY)"
-
 .PHONY: lint-install-packages
 lint-install-packages:
 	docker compose run ansible-runner ansible-lint install_packages.yaml
