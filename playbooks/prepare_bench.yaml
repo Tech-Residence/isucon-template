@@ -2,6 +2,7 @@
 - name: Stop all services
   hosts: all
   become: true
+  strategy: ansible.builtin.free
   tasks:
     - name: Stop systemd services
       ansible.builtin.systemd:
@@ -13,26 +14,17 @@
         - mysql
         - nginx
 
-- name: Setup proxy
-  hosts: proxy
-  become: true
-  tasks:
     - name: Setup proxy
       ansible.builtin.import_tasks:
         file: tasks/prepare_bench/setup_proxy.yaml
+      when: "'proxy' in group_names"
 
-- name: Setup app
-  hosts: app
-  become: true
-  tasks:
     - name: Setup app
       ansible.builtin.import_tasks:
         file: tasks/prepare_bench/setup_app.yaml
+      when: "'app' in group_names"
 
-- name: Setup db
-  hosts: db
-  become: true
-  tasks:
     - name: Setup db
       ansible.builtin.import_tasks:
         file: tasks/prepare_bench/setup_db.yaml
+      when: "'db' in group_names"
