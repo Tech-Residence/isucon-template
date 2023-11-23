@@ -55,3 +55,7 @@ check-dev-server-state:
 .PHONY: check-final-server-state
 check-final-server-state:
 	docker compose run ansible-runner ansible-playbook check_final_server_state.yaml -i /home/ubuntu/tmp/inventory.ini --private-key="/home/ubuntu/tmp/id_ed25519"
+
+.PHONY: lint
+lint:
+	docker-compose run ansible-runner ansible-lint /playbooks/*.yaml
