@@ -24,45 +24,15 @@
         mode: "0777"
         state: directory
 
-    ######################################
-    # 非同期で alp と pt-query-digest を実行
-    ######################################
     - name: Run alp
       ansible.builtin.shell:
         cmd: "alp json --file /var/log/nginx/access.log > /result/{{ _date.stdout }}/alp.log"
-      async: 120
-      poll: 0
       when: "'proxy' in group_names"
-      register: run_alp
 
     - name: Run pt-query-digest
       ansible.builtin.shell:
         cmd: "pt-query-digest /var/log/mysql/mysql-slow.log > /result/{{ _date.stdout }}/pt-query-digest.log"
-      async: 120
-      poll: 0
       when: "'db' in group_names"
-      register: run_pt_query_digest
-
-    ##########################
-    # 非同期タスクの終了待ち
-    ##########################
-    - name: Wait for alp task to complete
-      async_status:
-        jid: "{{ run_alp.ansible_job_id }}"
-      register: alp_result
-      until: alp_result.finished
-      retries: 30
-      delay: 5  # 5秒ごとに確認
-      when: alp_task is defined
-
-    - name: Wait for pt-query-digest task to complete
-      async_status:
-        jid: "{{ run_pt_query_digest.ansible_job_id }}"
-      register: pt_query_digest_result
-      until: pt_query_digest_result.finished
-      retries: 30
-      delay: 5  # 5秒ごとに確認
-      when: pt_query_digest_task is defined
 
     - name: Fetch nginx log files
       ansible.builtin.fetch:
