@@ -1,11 +1,17 @@
 ---
-- name: Sync app code
-  ansible.builtin.copy:
+- name: Upload nginx config files to server
+  ansible.posix.synchronize:
     src: /contents/home/isucon/isuumo
     dest: /home/isucon/
+
+- name: Set file owner and permissions
+  ansible.builtin.file:
+    path: /home/isucon/isuumo
     owner: isucon
     group: isucon
-    mode: '0644'
+    #mode: u=rwx,g=rwx,o=rwx
+    recurse: true
+
 - name: Build Go App
   ansible.builtin.shell:
     cmd: source ~/.bashrc && make all
