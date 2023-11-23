@@ -18,7 +18,7 @@
         enabled: false
       loop:
         - "{{ proxy_service }}"
-        #- "{{ app_service }}"
+        # - "{{ app_service }}"
         - "{{ db_service }}"
 
     ######################
@@ -49,6 +49,6 @@
         enabled: true
       when: "item.group in group_names"
       loop:
-        -  {"group": "proxy", "service": "{{ proxy_service }}" }
-        -  {"group": "app", "service": "{{ app_service }}" }
-        -  {"group": "db", "service": "{{ db_service }}" }
+        - {"group": "proxy", "service": "{{ proxy_service }}"}
+        - {"group": "app", "service": "{{ app_service }}"}
+        - {"group": "db", "service": "{{ d b_service }}"}
