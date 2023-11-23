@@ -15,9 +15,3 @@
   become_user: isucon
   register: result
   changed_when: "'Nothing to be done' not in result.stdout"
-- name: Restart app service
-  ansible.builtin.systemd:
-    name: isuumo.go
-    state: restarted
-    daemon_reload: true
-    enabled: true

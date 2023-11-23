@@ -3,17 +3,27 @@
   hosts: all
   become: true
   strategy: ansible.builtin.free
+  vars:
+    proxy_service: nginx
+    app_service: isuumo.go
+    db_service: mysql
   tasks:
+    ######################
+    # Stop services
+    ######################
     - name: Stop systemd services
       ansible.builtin.systemd:
         name: "{{ item }}"
         state: stopped
         enabled: false
       loop:
-        # - isuumo.go
-        - mysql
-        - nginx
+        - "{{ proxy_service }}"
+        #- "{{ app_service }}"
+        - "{{ db_service }}"
 
+    ######################
+    # Setup services
+    ######################
     - name: Setup proxy
       ansible.builtin.import_tasks:
         file: tasks/prepare_bench/setup_proxy.yaml
@@ -28,3 +38,17 @@
       ansible.builtin.import_tasks:
         file: tasks/prepare_bench/setup_db.yaml
       when: "'db' in group_names"
+
+    ######################
+    # Restart services
+    ######################
+    - name: Restart systemd services
+      ansible.builtin.systemd:
+        name: "{{ item.service }}"
+        state: started
+        enabled: true
+      when: "item.group in group_names"
+      loop:
+        -  {"group": "proxy", "service": "{{ proxy_service }}" }
+        -  {"group": "app", "service": "{{ app_service }}" }
+        -  {"group": "db", "service": "{{ db_service }}" }

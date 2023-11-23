@@ -29,9 +29,3 @@
     owner: mysql
     group: adm
     mode: '0644'
-- name: Restart mysql services
-  ansible.builtin.systemd:
-    name: mysql.service
-    state: restarted
-    daemon_reload: true
-    enabled: true

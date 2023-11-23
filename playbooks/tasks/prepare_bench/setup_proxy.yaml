@@ -17,9 +17,3 @@
   loop:
     - /var/log/nginx/access.log
     - /var/log/nginx/error.log
-- name: Restart nginx.service
-  ansible.builtin.systemd:
-    name: nginx.service
-    state: restarted
-    daemon_reload: true
-    enabled: true
