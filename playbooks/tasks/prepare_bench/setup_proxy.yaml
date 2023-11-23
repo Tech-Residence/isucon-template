@@ -1,11 +1,17 @@
 ---
-- name: Sync nginx conf
-  ansible.builtin.copy:
+- name: Upload nginx config files to server
+  ansible.posix.synchronize:
     src: /contents/etc/nginx
     dest: /etc/
+
+- name: Set file owner and permissions
+  ansible.builtin.file:
+    path: /etc/nginx
     owner: root
     group: root
-    mode: '0644'
+    #mode: u=rwx,g=rwx,o=rwx
+    recurse: true
+
 - name: Rotate nginx log
   ansible.builtin.copy:
     content: ''
@@ -17,9 +23,3 @@
   loop:
     - /var/log/nginx/access.log
     - /var/log/nginx/error.log
-- name: Restart nginx.service
-  ansible.builtin.systemd:
-    name: nginx.service
-    state: restarted
-    daemon_reload: true
-    enabled: true

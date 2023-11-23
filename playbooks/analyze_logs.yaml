@@ -11,9 +11,11 @@
       register: _date
       delegate_to: localhost
       changed_when: false
+
     - name: Print date
       ansible.builtin.debug:
         msg: "{{ _date.stdout }}"
+
     - name: Create dirs
       ansible.builtin.file:
         path: /result/{{ _date.stdout }}
@@ -21,14 +23,17 @@
         group: root
         mode: "0777"
         state: directory
+
     - name: Run alp
       ansible.builtin.shell:
         cmd: "alp json --file /var/log/nginx/access.log > /result/{{ _date.stdout }}/alp.log"
       when: "'proxy' in group_names"
+
     - name: Run pt-query-digest
       ansible.builtin.shell:
         cmd: "pt-query-digest /var/log/mysql/mysql-slow.log > /result/{{ _date.stdout }}/pt-query-digest.log"
       when: "'db' in group_names"
+
     - name: Fetch nginx log files
       ansible.builtin.fetch:
         src: "{{ item.src }}"
@@ -40,6 +45,7 @@
         # - { src: "/var/log/nginx/access.log", dest: "/result/{{ _date.stdout }}/access-{{ inventory_hostname }}.log" }
         # - { src: "/var/log/nginx/error.log", dest: "/result/{{ _date.stdout }}/error-{{ inventory_hostname }}.log" }
       when: "'proxy' in group_names"
+
     - name: Fetch mysql log files
       ansible.builtin.fetch:
         src: "{{ item.src }}"

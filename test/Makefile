@@ -48,6 +48,10 @@ install-packages:
 prepare-bench:
 	docker-compose run ansible-runner ansible-playbook prepare_bench.yaml -i /home/ubuntu/tmp/inventory.ini --private-key="/home/ubuntu/tmp/id_ed25519"
 
+.PHONY: analyze-logs
+analyze-logs:
+	docker-compose run ansible-runner ansible-playbook analyze_logs.yaml -i /home/ubuntu/tmp/inventory.ini --private-key="/home/ubuntu/tmp/id_ed25519"
+
 .PHONY: check-dev-server-state
 check-dev-server-state:
 	docker compose run ansible-runner ansible-playbook check_dev_server_state.yaml -i /home/ubuntu/tmp/inventory.ini --private-key="/home/ubuntu/tmp/id_ed25519"

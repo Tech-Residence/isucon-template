@@ -1,11 +1,17 @@
 ---
 - name: Sync mysql conf
-  ansible.builtin.copy:
+  ansible.posix.synchronize:
     src: /contents/etc/mysql
     dest: /etc/
+
+- name: Set file owner and permissions
+  ansible.builtin.file:
+    path: /etc/mysql
     owner: root
     group: root
-    mode: '0644'
+    #mode: u=rwx,g=rwx,o=rwx
+    recurse: true
+
 #- name: Sync my.cnf
 #  ansible.builtin.copy:
 #    src: /contents/etc/my.cnf
@@ -13,6 +19,7 @@
 #    owner: root
 #    group: root
 #    mode: '0644'
+
 #- name: Run sql/init.sh
 #  ansible.builtin.shell:
 #    cmd: source ~/.bashrc && ./init.sh
@@ -21,6 +28,7 @@
 #  become: true
 #  become_user: isucon
 #  changed_when: true
+
 - name: Rotate mysql log files
   ansible.builtin.copy:
     content: ''
@@ -29,9 +37,3 @@
     owner: mysql
     group: adm
     mode: '0644'
-- name: Restart mysql services
-  ansible.builtin.systemd:
-    name: mysql.service
-    state: restarted
-    daemon_reload: true
-    enabled: true
